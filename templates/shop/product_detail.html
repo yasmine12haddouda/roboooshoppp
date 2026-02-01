@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}{{ product.name }}{% endblock %}
+{% block content %}
+<div class="product-detail">
+    <div class="product-image">{% if product.image %}<img src="{{ product.image }}" alt="">{% else %}<span class="no-img">⚡</span>{% endif %}</div>
+    <div class="product-info">
+        <h1>{{ product.name }}</h1>
+        <p class="category">{{ product.category.name }}</p>
+        <p class="price">${{ product.price }}</p>
+        <p class="stock">{% if product.in_stock %}In stock ({{ product.stock }}){% else %}Out of stock{% endif %}</p>
+        <p class="description">{{ product.description }}</p>
+        <p class="seller">Sold by: {{ product.seller.username }}</p>
+        {% if user.is_authenticated and product.seller == user or user.is_admin_role %}
+        <div class="actions">
+            <a href="{% url 'shop:product_edit' product.slug %}" class="btn">Edit</a>
+            <form action="{% url 'shop:product_delete' product.slug %}" method="post" class="inline-form" onsubmit="return confirm('Delete this product?');">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-danger">Delete</button>
+            </form>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

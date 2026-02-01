@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}{{ title }}{% endblock %}
+{% block content %}
+<div class="form-box">
+    <h1>{{ title }}</h1>
+    <form method="post" class="product-form">
+        {% csrf_token %}
+        {% for field in form %}
+        <div class="form-group">
+            <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+            {{ field }}
+            {% if field.errors %}
+            <span class="error">{{ field.errors.0 }}</span>
+            {% endif %}
+        </div>
+        {% endfor %}
+        <button type="submit">Save</button>
+        <a href="{% url 'shop:home' %}" class="btn-link">Cancel</a>
+    </form>
+</div>
+{% endblock %}

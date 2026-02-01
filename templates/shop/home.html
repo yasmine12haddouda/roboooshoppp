@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}Home{% endblock %}
+{% block content %}
+<div class="hero">
+    <h1>Robo Shop</h1>
+    <p>Arduino, Raspberry Pi, Sensors, Actuators, Motors & more</p>
+</div>
+<form class="search-form" method="get" action="{% url 'shop:home' %}">
+    <input type="text" name="q" placeholder="Search products..." value="{{ request.GET.q }}">
+    <select name="category">
+        <option value="">All categories</option>
+        {% for cat in categories %}
+        <option value="{{ cat.slug }}" {% if request.GET.category == cat.slug %}selected{% endif %}>{{ cat.name }}</option>
+        {% endfor %}
+    </select>
+    <button type="submit">Search</button>
+</form>
+<div class="product-grid">
+    {% for product in products %}
+    <article class="product-card">
+        <a href="{% url 'shop:product_detail' product.slug %}">
+            <div class="product-image">{% if product.image %}<img src="{{ product.image }}" alt="">{% else %}<span class="no-img">⚡</span>{% endif %}</div>
+            <h3>{{ product.name }}</h3>
+            <p class="price">${{ product.price }}</p>
+            <p class="stock">{% if product.in_stock %}In stock{% else %}Out of stock{% endif %}</p>
+        </a>
+    </article>
+    {% empty %}
+    <p class="empty">No products found.</p>
+    {% endfor %}
+</div>
+{% endblock %}

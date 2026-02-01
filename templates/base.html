@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Robo Shop{% endblock %} | Electronic Components</title>
+    {% load static %}
+<link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body>
+    <nav class="navbar">
+        <a href="{% url 'shop:home' %}" class="logo">Robo Shop</a>
+        <div class="nav-links">
+            <a href="{% url 'shop:home' %}">Home</a>
+            {% if user.is_authenticated %}
+                {% if user.is_seller_role or user.is_admin_role %}
+                <a href="{% url 'shop:product_create' %}">Add Product</a>
+                {% endif %}
+                <span class="user-info">{{ user.username }} ({{ user.role }})</span>
+                <form action="{% url 'accounts:logout' %}" method="post" class="logout-form">
+                    {% csrf_token %}
+                    <button type="submit">Logout</button>
+                </form>
+            {% else %}
+                <a href="{% url 'accounts:login' %}">Login</a>
+                <a href="{% url 'accounts:register' %}">Register</a>
+            {% endif %}
+        </div>
+    </nav>
+    {% if messages %}
+    <div class="messages">
+        {% for msg in messages %}
+        <div class="alert alert-{{ msg.tags }}">{{ msg }}</div>
+        {% endfor %}
+    </div>
+    {% endif %}
+    <main class="container">
+        {% block content %}{% endblock %}
+    </main>
+    <footer class="footer">
+        <p>&copy; Robo Shop - Arduino, Raspberry Pi, Sensors & Motors</p>
+    </footer>
+    <script src="{% static 'js/main.js' %}"></script>
+</body>
+</html>
