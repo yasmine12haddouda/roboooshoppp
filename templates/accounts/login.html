@@ -1,24 +1,29 @@
 {% extends "base.html" %}
 {% block title %}Login{% endblock %}
 {% block content %}
-<div class="auth-box">
-    <h1>Login</h1>
-    <form method="post" class="auth-form">
-        {% csrf_token %}
-        {% for field in form %}
-        <div class="form-group">
-            <label for="{{ field.id_for_label }}">{{ field.label }}</label>
-            {{ field }}
-            {% if field.errors %}
-            <span class="error">{{ field.errors.0 }}</span>
-            {% endif %}
+<div class="row justify-content-center">
+    <div class="col-md-5">
+        <div class="card shadow">
+            <div class="card-body p-4">
+                <h2 class="card-title text-center mb-4">Login</h2>
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label class="form-label">Username or Email</label>
+                        <input type="text" name="username" class="form-control" value="{{ form.username.value|default:'' }}" required>
+                        {% if form.username.errors %}<div class="text-danger small">{{ form.username.errors.0 }}</div>{% endif %}
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Password</label>
+                        <input type="password" name="password" class="form-control" required>
+                        {% if form.password.errors %}<div class="text-danger small">{{ form.password.errors.0 }}</div>{% endif %}
+                    </div>
+                    {% if form.non_field_errors %}<div class="alert alert-danger">{{ form.non_field_errors.0 }}</div>{% endif %}
+                    <button type="submit" class="btn btn-primary w-100">Login</button>
+                </form>
+                <p class="text-center mt-3 mb-0">No account? <a href="{% url 'accounts:register' %}">Register</a></p>
+            </div>
         </div>
-        {% endfor %}
-        {% if form.non_field_errors %}
-        <div class="error">{{ form.non_field_errors.0 }}</div>
-        {% endif %}
-        <button type="submit">Login</button>
-    </form>
-    <p>No account? <a href="{% url 'accounts:register' %}">Register</a></p>
+    </div>
 </div>
 {% endblock %}

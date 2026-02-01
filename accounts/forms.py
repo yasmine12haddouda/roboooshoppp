@@ -1,7 +1,7 @@
 """Forms for auth - Single Responsibility: validation only."""
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
-from .models import User, Role
+from .models import User, Role, Seller
 
 
 class RegisterForm(UserCreationForm):
@@ -26,6 +26,14 @@ class RegisterForm(UserCreationForm):
 
 
 class LoginForm(forms.Form):
-    """Simple login form."""
-    username = forms.CharField(max_length=150)
+    """Login form - accepts username or email."""
+    username = forms.CharField(max_length=150, label="Username or Email")
     password = forms.CharField(widget=forms.PasswordInput)
+
+
+class SellerProfileForm(forms.ModelForm):
+    """Seller profile - phone, address."""
+
+    class Meta:
+        model = Seller
+        fields = ("phone", "address")

@@ -1,45 +1,65 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Robo Shop{% endblock %} | Electronic Components</title>
-    {% load static %}
-<link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
 </head>
 <body>
-    <nav class="navbar">
-        <a href="{% url 'shop:home' %}" class="logo">Robo Shop</a>
-        <div class="nav-links">
-            <a href="{% url 'shop:home' %}">Home</a>
-            {% if user.is_authenticated %}
-                {% if user.is_seller_role or user.is_admin_role %}
-                <a href="{% url 'shop:product_create' %}">Add Product</a>
-                {% endif %}
-                <span class="user-info">{{ user.username }} ({{ user.role }})</span>
-                <form action="{% url 'accounts:logout' %}" method="post" class="logout-form">
-                    {% csrf_token %}
-                    <button type="submit">Logout</button>
-                </form>
-            {% else %}
-                <a href="{% url 'accounts:login' %}">Login</a>
-                <a href="{% url 'accounts:register' %}">Register</a>
-            {% endif %}
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand fw-bold" href="{% url 'shop:home' %}">🤖 Robo Shop</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#nav" aria-controls="nav" aria-expanded="false">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="nav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item"><a class="nav-link" href="{% url 'shop:home' %}">Home</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{% url 'shop:cart' %}">Cart {% if cart_count %}<span class="badge bg-danger">{{ cart_count }}</span>{% endif %}</a></li>
+                    {% if user.is_authenticated %}
+                        {% if user.is_seller_role or user.is_admin_role %}
+                        <li class="nav-item"><a class="nav-link" href="{% url 'shop:seller_dashboard' %}">Dashboard</a></li>
+                        <li class="nav-item"><a class="nav-link" href="{% url 'shop:product_create' %}">Add Product</a></li>
+                        <li class="nav-item"><a class="nav-link" href="{% url 'accounts:seller_profile' %}">Profile</a></li>
+                        {% endif %}
+                    {% endif %}
+                </ul>
+                <ul class="navbar-nav">
+                    {% if user.is_authenticated %}
+                    <li class="nav-item"><span class="nav-link">{{ user.username }} ({{ user.role }})</span></li>
+                    <li class="nav-item">
+                        <form action="{% url 'accounts:logout' %}" method="post" class="d-inline">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-outline-light btn-sm">Logout</button>
+                        </form>
+                    </li>
+                    {% else %}
+                    <li class="nav-item"><a class="nav-link" href="{% url 'accounts:login' %}">Login</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{% url 'accounts:register' %}">Register</a></li>
+                    {% endif %}
+                </ul>
+            </div>
         </div>
     </nav>
     {% if messages %}
-    <div class="messages">
+    <div class="container mt-2">
         {% for msg in messages %}
-        <div class="alert alert-{{ msg.tags }}">{{ msg }}</div>
+        <div class="alert alert-{{ msg.tags }} alert-dismissible fade show" role="alert">{{ msg }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
         {% endfor %}
     </div>
     {% endif %}
-    <main class="container">
+    <main class="container py-4">
         {% block content %}{% endblock %}
     </main>
-    <footer class="footer">
-        <p>&copy; Robo Shop - Arduino, Raspberry Pi, Sensors & Motors</p>
+    <footer class="bg-dark text-light text-center py-3 mt-5">
+        <p class="mb-0">&copy; Robo Shop - Arduino, Raspberry Pi, Sensors & Motors</p>
     </footer>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script src="{% static 'js/main.js' %}"></script>
 </body>
 </html>

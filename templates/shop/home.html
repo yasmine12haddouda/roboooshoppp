@@ -1,32 +1,59 @@
 {% extends "base.html" %}
 {% block title %}Home{% endblock %}
 {% block content %}
-<div class="hero">
+<div class="text-center mb-4">
     <h1>Robo Shop</h1>
-    <p>Arduino, Raspberry Pi, Sensors, Actuators, Motors & more</p>
+    <p class="text-muted">Arduino, Raspberry Pi, Sensors, Actuators, Motors & more</p>
 </div>
-<form class="search-form" method="get" action="{% url 'shop:home' %}">
-    <input type="text" name="q" placeholder="Search products..." value="{{ request.GET.q }}">
-    <select name="category">
-        <option value="">All categories</option>
-        {% for cat in categories %}
-        <option value="{{ cat.slug }}" {% if request.GET.category == cat.slug %}selected{% endif %}>{{ cat.name }}</option>
-        {% endfor %}
-    </select>
-    <button type="submit">Search</button>
+<form class="row g-2 mb-4" method="get" action="{% url 'shop:home' %}">
+    <div class="col-md-6">
+        <input type="text" name="q" class="form-control" placeholder="Search products..." value="{{ request.GET.q }}">
+    </div>
+    <div class="col-md-4">
+        <select name="category" class="form-select">
+            <option value="">All categories</option>
+            {% for cat in categories %}
+            <option value="{{ cat.slug }}" {% if request.GET.category == cat.slug %}selected{% endif %}>{{ cat.name }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="col-md-2">
+        <button type="submit" class="btn btn-primary w-100">Search</button>
+    </div>
 </form>
-<div class="product-grid">
+<div class="row g-4">
     {% for product in products %}
-    <article class="product-card">
-        <a href="{% url 'shop:product_detail' product.slug %}">
-            <div class="product-image">{% if product.image %}<img src="{{ product.image }}" alt="">{% else %}<span class="no-img">⚡</span>{% endif %}</div>
-            <h3>{{ product.name }}</h3>
-            <p class="price">${{ product.price }}</p>
-            <p class="stock">{% if product.in_stock %}In stock{% else %}Out of stock{% endif %}</p>
-        </a>
-    </article>
+    <div class="col-sm-6 col-md-4 col-lg-3">
+        <div class="card h-100 shadow-sm">
+            <a href="{% url 'shop:product_detail' product.slug %}" class="text-decoration-none text-dark">
+                <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 180px;">
+                    {% if product.image %}
+                    <img src="{{ product.image.url }}" alt="{{ product.name }}" class="img-fluid" style="max-height: 180px; object-fit: contain;">
+                    {% else %}
+                    <span class="display-4 text-muted">⚡</span>
+                    {% endif %}
+                </div>
+                <div class="card-body">
+                    <h6 class="card-title">{{ product.name }}</h6>
+                    <p class="text-primary fw-bold mb-1">${{ product.price }}</p>
+                    <small class="{% if product.in_stock %}text-success{% else %}text-danger{% endif %}">
+                        {% if product.in_stock %}In stock{% else %}Out of stock{% endif %}
+                    </small>
+                </div>
+            </a>
+            {% if product.in_stock %}
+            <div class="card-footer bg-white border-0">
+                <form action="{% url 'shop:cart_add' product.id %}" method="post" class="d-flex gap-1">
+                    {% csrf_token %}
+                    <input type="number" name="quantity" value="1" min="1" max="{{ product.stock }}" class="form-control form-control-sm" style="width: 70px;">
+                    <button type="submit" class="btn btn-sm btn-primary flex-grow-1">Add to Cart</button>
+                </form>
+            </div>
+            {% endif %}
+        </div>
+    </div>
     {% empty %}
-    <p class="empty">No products found.</p>
+    <p class="text-center text-muted col-12">No products found.</p>
     {% endfor %}
 </div>
 {% endblock %}

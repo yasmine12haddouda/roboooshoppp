@@ -17,7 +17,8 @@ class User(AbstractUser):
         choices=Role.choices,
         default=Role.BUYER
     )
-    phone = models.CharField(max_length=20, blank=True)
+    phone = models.CharField(max_length=30, blank=True)
+    address = models.CharField(max_length=255, blank=True)
 
     def is_admin_role(self):
         return self.role == Role.ADMIN
@@ -27,3 +28,18 @@ class User(AbstractUser):
 
     def is_buyer_role(self):
         return self.role == Role.BUYER
+
+
+class Seller(models.Model):
+    """Seller profile - OneToOne with User, phone, address."""
+    user = models.OneToOneField(
+        User,
+        on_delete=models.CASCADE,
+        related_name="seller_profile"
+    )
+    phone = models.CharField(max_length=30, blank=True)
+    address = models.CharField(max_length=255, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.user.username

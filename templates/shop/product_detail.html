@@ -1,19 +1,38 @@
 {% extends "base.html" %}
 {% block title %}{{ product.name }}{% endblock %}
 {% block content %}
-<div class="product-detail">
-    <div class="product-image">{% if product.image %}<img src="{{ product.image }}" alt="">{% else %}<span class="no-img">⚡</span>{% endif %}</div>
-    <div class="product-info">
+<div class="row">
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body text-center p-4 bg-light">
+                {% if product.image %}
+                <img src="{{ product.image.url }}" alt="{{ product.name }}" class="img-fluid">
+                {% else %}
+                <span class="display-1 text-muted">⚡</span>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    <div class="col-md-8">
         <h1>{{ product.name }}</h1>
-        <p class="category">{{ product.category.name }}</p>
-        <p class="price">${{ product.price }}</p>
-        <p class="stock">{% if product.in_stock %}In stock ({{ product.stock }}){% else %}Out of stock{% endif %}</p>
-        <p class="description">{{ product.description }}</p>
-        <p class="seller">Sold by: {{ product.seller.username }}</p>
+        <p class="text-muted">{{ product.category.name }}</p>
+        <p class="fs-3 text-primary fw-bold">${{ product.price }}</p>
+        <p class="{% if product.in_stock %}text-success{% else %}text-danger{% endif %}">
+            {% if product.in_stock %}In stock ({{ product.stock }}){% else %}Out of stock{% endif %}
+        </p>
+        <p class="mb-4">{{ product.description }}</p>
+        <p class="text-muted small">Sold by: {{ product.seller.username }}</p>
+        {% if product.in_stock %}
+        <form action="{% url 'shop:cart_add' product.id %}" method="post" class="d-flex gap-2 mb-3">
+            {% csrf_token %}
+            <input type="number" name="quantity" value="1" min="1" max="{{ product.stock }}" class="form-control" style="width: 100px;">
+            <button type="submit" class="btn btn-primary">Add to Cart</button>
+        </form>
+        {% endif %}
         {% if user.is_authenticated and product.seller == user or user.is_admin_role %}
-        <div class="actions">
-            <a href="{% url 'shop:product_edit' product.slug %}" class="btn">Edit</a>
-            <form action="{% url 'shop:product_delete' product.slug %}" method="post" class="inline-form" onsubmit="return confirm('Delete this product?');">
+        <div class="d-flex gap-2">
+            <a href="{% url 'shop:product_edit' product.slug %}" class="btn btn-warning">Edit</a>
+            <form action="{% url 'shop:product_delete' product.slug %}" method="post" onsubmit="return confirm('Delete this product?');">
                 {% csrf_token %}
                 <button type="submit" class="btn btn-danger">Delete</button>
             </form>
