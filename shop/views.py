@@ -12,18 +12,28 @@ from .services import ProductService, CartService, OrderService
 
 
 def home_view(request):
-    """Home page - list products and categories."""
-    products = Product.objects.filter(stock__gt=0).select_related("category", "seller")
-    categories = Category.objects.all()
+    """Home page - products grouped by category."""
+    categories = Category.objects.all().order_by("name")
     q = request.GET.get("q", "")
     cat = request.GET.get("category", "")
+    view_all = request.GET.get("view_all") == "1"
+    products_qs = Product.objects.filter(stock__gt=0).select_related("category", "seller").order_by("category__name", "name")
     if q:
-        products = products.filter(Q(name__icontains=q) | Q(description__icontains=q))
+        products_qs = products_qs.filter(Q(name__icontains=q) | Q(description__icontains=q))
     if cat:
-        products = products.filter(category__slug=cat)
-    cart_items, cart_total = CartService.get_cart_items(request)
-    cart_count = sum(i["quantity"] for i in cart_items)
-    context = {"products": products, "categories": categories, "cart_count": cart_count}
+        products_qs = products_qs.filter(category__slug=cat)
+    # Group products by category for main page
+    products_by_category = {}
+    for p in products_qs:
+        key = (p.category.id, p.category.name, p.category.slug)
+        if key not in products_by_category:
+            products_by_category[key] = []
+        products_by_category[key].append(p)
+    # Limit to 6 per category unless view_all or single category filter
+    limit = 6 if not (view_all or cat) else 999
+    for key in products_by_category:
+        products_by_category[key] = products_by_category[key][:limit]
+    context = {"products_by_category": products_by_category, "categories": categories, "q": q, "cat": cat}
     return render(request, "shop/home.html", context)
 
 

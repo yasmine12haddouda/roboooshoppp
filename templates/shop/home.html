@@ -1,59 +1,83 @@
 {% extends "base.html" %}
 {% block title %}Home{% endblock %}
 {% block content %}
-<div class="text-center mb-4">
-    <h1>Robo Shop</h1>
-    <p class="text-muted">Arduino, Raspberry Pi, Sensors, Actuators, Motors & more</p>
-</div>
-<form class="row g-2 mb-4" method="get" action="{% url 'shop:home' %}">
-    <div class="col-md-6">
-        <input type="text" name="q" class="form-control" placeholder="Search products..." value="{{ request.GET.q }}">
-    </div>
-    <div class="col-md-4">
-        <select name="category" class="form-select">
-            <option value="">All categories</option>
-            {% for cat in categories %}
-            <option value="{{ cat.slug }}" {% if request.GET.category == cat.slug %}selected{% endif %}>{{ cat.name }}</option>
-            {% endfor %}
+
+<!-- Hero Section -->
+<div class="robo-hero">
+  <div class="robo-hero-content">
+    <h1 class="robo-hero-title">🤖 Robo Shop</h1>
+    <p class="robo-hero-subtitle">Arduino • Raspberry Pi • Sensors • Motors • Modules</p>
+    <form class="robo-search" method="get" action="{% url 'shop:home' %}">
+      <div class="robo-search-inner">
+        <input type="text" name="q" placeholder="Search products..." value="{{ q }}" class="robo-search-input">
+        <select name="category" class="robo-search-select">
+          <option value="">All categories</option>
+          {% for c in categories %}
+          <option value="{{ c.slug }}" {% if cat == c.slug %}selected{% endif %}>{{ c.name }}</option>
+          {% endfor %}
         </select>
-    </div>
-    <div class="col-md-2">
-        <button type="submit" class="btn btn-primary w-100">Search</button>
-    </div>
-</form>
-<div class="row g-4">
-    {% for product in products %}
-    <div class="col-sm-6 col-md-4 col-lg-3">
-        <div class="card h-100 shadow-sm">
-            <a href="{% url 'shop:product_detail' product.slug %}" class="text-decoration-none text-dark">
-                <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 180px;">
-                    {% if product.image %}
-                    <img src="{{ product.image.url }}" alt="{{ product.name }}" class="img-fluid" style="max-height: 180px; object-fit: contain;">
-                    {% else %}
-                    <span class="display-4 text-muted">⚡</span>
-                    {% endif %}
-                </div>
-                <div class="card-body">
-                    <h6 class="card-title">{{ product.name }}</h6>
-                    <p class="text-primary fw-bold mb-1">${{ product.price }}</p>
-                    <small class="{% if product.in_stock %}text-success{% else %}text-danger{% endif %}">
-                        {% if product.in_stock %}In stock{% else %}Out of stock{% endif %}
-                    </small>
-                </div>
-            </a>
-            {% if product.in_stock %}
-            <div class="card-footer bg-white border-0">
-                <form action="{% url 'shop:cart_add' product.id %}" method="post" class="d-flex gap-1">
-                    {% csrf_token %}
-                    <input type="number" name="quantity" value="1" min="1" max="{{ product.stock }}" class="form-control form-control-sm" style="width: 70px;">
-                    <button type="submit" class="btn btn-sm btn-primary flex-grow-1">Add to Cart</button>
-                </form>
-            </div>
-            {% endif %}
-        </div>
-    </div>
-    {% empty %}
-    <p class="text-center text-muted col-12">No products found.</p>
-    {% endfor %}
+        <button type="submit" class="robo-search-btn">Search</button>
+      </div>
+    </form>
+  </div>
 </div>
+
+<!-- Category Pills -->
+<div class="robo-cat-pills">
+  <a href="{% url 'shop:home' %}" class="robo-pill {% if not cat %}active{% endif %}">All</a>
+  {% for c in categories %}
+  <a href="?category={{ c.slug }}{% if q %}&q={{ q }}{% endif %}" class="robo-pill {% if cat == c.slug %}active{% endif %}">{{ c.name }}</a>
+  {% endfor %}
+</div>
+
+<!-- Products by Category -->
+<div class="robo-content">
+  {% if products_by_category %}
+    {% for key, products in products_by_category.items %}
+    {% with cat_id=key.0 cat_name=key.1 cat_slug=key.2 %}
+    <section class="robo-category-section">
+      <div class="robo-category-header">
+        <h2 class="robo-category-title">{{ cat_name }}</h2>
+        <a href="?category={{ cat_slug }}&view_all=1{% if q %}&q={{ q }}{% endif %}" class="robo-view-all">View all →</a>
+      </div>
+      <div class="robo-product-grid">
+        {% for product in products %}
+        <article class="robo-product-card">
+          <a href="{% url 'shop:product_detail' product.slug %}" class="robo-card-link">
+            <div class="robo-card-image">
+              {% if product.image %}
+              <img src="{{ product.image.url }}" alt="{{ product.name }}">
+              {% else %}
+              <span class="robo-card-icon">⚡</span>
+              {% endif %}
+              {% if product.in_stock %}
+              <span class="robo-stock-badge">In stock</span>
+              {% endif %}
+            </div>
+            <div class="robo-card-body">
+              <h3 class="robo-card-title">{{ product.name }}</h3>
+              <p class="robo-card-price">${{ product.price }}</p>
+            </div>
+          </a>
+          {% if product.in_stock %}
+          <form action="{% url 'shop:cart_add' product.id %}" method="post" class="robo-card-add">
+            {% csrf_token %}
+            <input type="number" name="quantity" value="1" min="1" max="{{ product.stock }}">
+            <button type="submit">Add to cart</button>
+          </form>
+          {% endif %}
+        </article>
+        {% endfor %}
+      </div>
+    </section>
+    {% endwith %}
+    {% endfor %}
+  {% else %}
+  <div class="robo-empty">
+    <p>No products found. Try a different search or category.</p>
+    <a href="{% url 'shop:home' %}" class="robo-btn">Clear filters</a>
+  </div>
+  {% endif %}
+</div>
+
 {% endblock %}
